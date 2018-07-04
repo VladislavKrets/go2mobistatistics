@@ -91,15 +91,25 @@ public class Main {
                     while ((line = reader.readLine()) != null) {
                         lineBuilder.append(line);
                     }
-                    answer = HttpMethodUtils.getMethod(httpcon.getHeaderField("Location") + "?page_number=1&page_size=500", accountsEntity.getApiKey());
-                    sourceStatisticsEntities = gson.fromJson(answer, List.class);
+                    try {
+                        answer = HttpMethodUtils.getMethod(httpcon.getHeaderField("Location") + "?page_number=1&page_size=500", accountsEntity.getApiKey());
+                        sourceStatisticsEntities = gson.fromJson(answer, List.class);
+                    } catch (Exception e) {
+                        Utils.writeLog(e.toString());
+                        continue;
+                    }
                     for (SourceStatisticsEntity sourceStatisticsEntity : sourceStatisticsEntities) {
                         sourceStatisticsEntity.setAccount_id(accountsEntity.getAccountId());
                         sourceStatisticsEntity.setBuyerId(accountsEntity.getBuyerId());
                         sourceStatisticsEntity.setReceiver("API");
 
-                        answer = HttpMethodUtils.getMethod("https://api.go2mobi.com/v1/campaigns/" + sourceStatisticsEntity.getCampaignId(), accountsEntity.getApiKey());
-                        url = gson.fromJson(answer, String.class);
+                        try {
+                            answer = HttpMethodUtils.getMethod("https://api.go2mobi.com/v1/campaigns/" + sourceStatisticsEntity.getCampaignId(), accountsEntity.getApiKey());
+                            url = gson.fromJson(answer, String.class);
+                        } catch (Exception e) {
+                            Utils.writeLog(e.toString());
+                            continue;
+                        }
                         parameters = Utils.getUrlParameters(url);
                         if (parameters.containsKey("cab")) {
                             if (parameters.get("cab").matches("\\d+")
@@ -111,7 +121,7 @@ public class Main {
                         } else sourceStatisticsEntity.setAfid(2);
                         if (Main.days != 0) {
                             entity = MySQLDaoImpl.getInstance().getSourceStatistics(sourceStatisticsEntity.getAccount_id(),
-                                    sourceStatisticsEntity.getCampaignName(), sourceStatisticsEntity.getDate());
+                                    sourceStatisticsEntity.getDate());
                             if (entity != null) {
                                 sourceStatisticsEntity.setId(entity.getId());
                                 MySQLDaoImpl.getInstance().updateSourceStatistics(sourceStatisticsEntity);

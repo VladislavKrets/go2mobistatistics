@@ -108,13 +108,12 @@ public class MySQLDaoImpl {
         session.getTransaction().commit();
         session.close();
     }
-    public SourceStatisticsEntity getSourceStatistics(int accountId, String name, Date date) {
+    public SourceStatisticsEntity getSourceStatistics(int accountId, Date date) {
         Session session = sessionFactory.openSession();
         SourceStatisticsEntity sourceStatisticsEntity = null;
         try {
-            sourceStatisticsEntity = session.createQuery("from SourceStatisticsEntity where account_id=:accountId and campaign_name=:campaignName and date=:date", SourceStatisticsEntity.class)
+            sourceStatisticsEntity = session.createQuery("from SourceStatisticsEntity where account_id=:accountId and date=:date", SourceStatisticsEntity.class)
                     .setParameter("accountId", accountId)
-                    .setParameter("campaignName", name)
                     .setParameter("date", date)
                     .getSingleResult();
         } catch (NoResultException e) {
